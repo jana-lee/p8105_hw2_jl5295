@@ -1,0 +1,22 @@
+---
+title: "p8105_hw2_jl5295"
+author: "Jana Lee"
+date: "9/29/2019"
+output: github_document
+---
+
+# Problem 1: Mr. Trash Wheel
+```{r}
+library(tidyverse)
+library(readxl)
+trashwheel = read_excel("./Data/HealthyHarborWaterWheelTotals20180728.xlsx", sheet = "Mr. Trash Wheel")
+```
+
+
+
+# Problem 2: FiveThirtyEight
+```{r}
+fivethirtyeight = read_csv(file = "./Data/fivethirtyeight_datasets/pols-month.csv")
+```
+
+
