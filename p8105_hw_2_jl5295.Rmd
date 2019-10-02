@@ -9,7 +9,7 @@ output: github_document
 ```{r}
 library(tidyverse)
 library(readxl)
-trashwheel = read_excel("./Data/HealthyHarborWaterWheelTotals20180728.xlsx", sheet = "Mr. Trash Wheel")
+trashwheel = read_excel("./Data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "Mr. Trash Wheel")
 ```
 
 
@@ -19,4 +19,31 @@ trashwheel = read_excel("./Data/HealthyHarborWaterWheelTotals20180728.xlsx", she
 fivethirtyeight = read_csv(file = "./Data/fivethirtyeight_datasets/pols-month.csv")
 ```
 
+
+# Problem 3: Popular Baby Names
+
+## Loading and tidying the data
+```{r}
+library (dplyr)
+babynames = read_csv(file = "./Data/Popular_Baby_Names.csv") %>%
+  janitor :: clean_names() %>% 
+  rename(birth_year = year_of_birth) %>% 
+  distinct()
+```
+
+
+## Creating a reader-friendly table for Olivia
+```{r}
+babynames %>% 
+```
+
+
+## Scatterplot for male, white, non-hispanic children
+```{r}
+scatterplot = 
+  babynames %>%
+  filter(gender == MALE) %>% 
+  ggplot(aes(x = rank, y = childs_first_name,)) + geom_point()
+
+```
 
