@@ -28,22 +28,25 @@ library (dplyr)
 babynames = read_csv(file = "./Data/Popular_Baby_Names.csv") %>%
   janitor :: clean_names() %>% 
   rename(birth_year = year_of_birth) %>% 
-  distinct()
+  distinct() %>% 
+  mutate(ethnicity = replace (ethnicity, ethnicity == "ASIAN AND PACI", "ASIAN AND PACIFIC ISLANDER")) %>% 
+  mutate(ethnicity = replace (ethnicity, ethnicity == "BLACK NON HISP", "BLACK NON HISPANIC")) %>% 
+  mutate(ethnicity = replace (ethnicity, ethnicity == "WHITE NON HISP", "WHITE NON HISPANIC"))
 ```
+
+```{r}
+
+```
+
 
 
 ## Creating a reader-friendly table for Olivia
 ```{r}
-babynames %>% 
 ```
 
 
 ## Scatterplot for male, white, non-hispanic children
 ```{r}
-scatterplot = 
-  babynames %>%
-  filter(gender == MALE) %>% 
-  ggplot(aes(x = rank, y = childs_first_name,)) + geom_point()
 
 ```
 
