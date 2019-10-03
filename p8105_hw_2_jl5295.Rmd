@@ -5,18 +5,24 @@ date: "9/29/2019"
 output: github_document
 ---
 
-# Problem 1: Mr. Trash Wheel
+# Problem 1: Mr. Trash Wheel Dataset
+
+Read and clean the Mr. Trash Wheel sheet:
 ```{r}
 library(tidyverse)
 library(readxl)
-  trashwheel = read_excel("./Data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "Mr. Trash Wheel", range = cell_cols("A:N")) %>%
+  
+trashwheel = read_excel("./Data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "Mr. Trash Wheel", range = cell_cols("A:N")) %>%
   janitor :: clean_names() %>% 
   drop_na(dumpster) %>% 
-  mutate(sports_balls = round (sports_balls))
+  mutate(
+    sports_balls = round (sports_balls),
+    sports_balls = as.numeric(sports_balls)
+  )
 ```
 
+Read and clean precipitation data for 2017 and 2018:
 ```{r}
-library(readxl)
 precipitation_2017 = read_excel("./Data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "2017 Precipitation", range = cell_rows(2:14)) %>% 
   mutate(year = 2017)
 
@@ -25,19 +31,23 @@ precipitation_2018 = read_excel ("./Data/Trash-Wheel-Collection-Totals-8-6-19.xl
 
 precipitation_final = bind_rows(precipitation_2017, precipitation_2018) %>% 
   mutate(Month = month.name[Month])
-```
 
+# Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in both resulting datasets, and give examples of key variables. For available data, what was the total precipitation in 2018? What was the median number of sports balls in a dumpster in 2017?
+```
+The Mr. Trash Wheel dataset has 344 observations and 14 variables. The 2017 and 2018 Precipitation datasets each have 12 observations and 3 variables, whereas the combined 2017 and 2018 Precipitation datasets have 24 observations and 3 variables. The total precipitation in 2018 was `r sum(pull(precipitation_2018,Total))`.
 
 
 # Problem 2: FiveThirtyEight
 ```{r}
-fivethirtyeight = read_csv(file = "./Data/fivethirtyeight_datasets/pols-month.csv")
+pols_month = read_csv(file = "./Data/fivethirtyeight_datasets/pols-month.csv") 
 ```
+822 and 11 variables
+if statements
+  president = recode(prez)
 
+# Problem 3: Popular Baby Names Dataset
 
-# Problem 3: Popular Baby Names
-
-## Loading and tidying the data
+## Load and tidy the data (babynames)
 ```{r}
 library (dplyr)
 babynames = read_csv(file = "./Data/Popular_Baby_Names.csv") %>%
@@ -51,20 +61,59 @@ babynames = read_csv(file = "./Data/Popular_Baby_Names.csv") %>%
 ```
 Description of what was done: 
 
-## Creating a reader-friendly table for Olivia
+## Produce a well-structured, reader-friendly table for Olivia
 ```{r}
-
-olivia = filter(babynames, childs_first_name == "OLIVIA") %>%
-  select(-c("childs_first_name", "count", "gender"))  %>% 
+olivia = 
+  babynames %>% 
+  filter(childs_first_name == "OLIVIA", gender == "FEMALE") %>%
+  select(-c("childs_first_name", "count", "gender"))  %>%
+  group_by(ethnicity, birth_year) %>% 
   pivot_wider(
     names_from = "birth_year",
     values_from = "rank"
-  )
+  ) %>% 
+  select(ethnicity, `2011`, `2012`, `2013`, `2014`, `2015`, `2016`)
 ```
-## JANA CHECK ORDERING FOR YEARS.
 
-## Scatterplot for male, white, non-hispanic children
+
+## Produce a well-structured, reader-friendly table most popular male name
 ```{r}
-
+male_name =
+  babynames %>% 
+  filter(gender == "MALE", rank == 1) %>% 
+  select(-c("count", "gender")) %>% 
+  group_by(ethnicity, birth_year) %>% 
+  summarize(childs_first_name) %>% 
+  pivot_wider(
+    names_from = "birth_year",
+    values_from = "childs_first_name"
+  ) %>% 
+  knitr::kable()
+male_name
 ```
+
+## Produce a Scatterplot for Rank in Popularity and Number of Children with a Name
+```{r}
+male_white_2016 =
+  babynames %>%
+  filter(
+    gender == "MALE", 
+    ethnicity == "WHITE NON HISPANIC",
+    birth_year == 2016)
+  
+male_white_2016_plot =
+  male_white_2016 %>% 
+  ggplot(aes(x = rank, y = count)) +
+  geom_point() +
+  labs(
+    x = "Rank in Name Popularity",
+    y = "Number of Children with a Name",
+    title = "Rank in Popularity of Male Children Names",
+    caption = "Rank in popularity of male names for white,   non-hispanic children born in 2016.")
+
+male_white_2016_plot
+```
+
+
+
 
