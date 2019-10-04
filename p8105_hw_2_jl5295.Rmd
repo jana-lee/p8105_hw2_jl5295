@@ -4,14 +4,16 @@ author: "Jana Lee"
 date: "9/29/2019"
 output: github_document
 ---
+Load Packages:
+```{r, message = FALSE}
+library(tidyverse)
+library(readxl)
+```
 
 # Problem 1: Mr. Trash Wheel Dataset
 
 Read and clean the Mr. Trash Wheel sheet:
 ```{r}
-library(tidyverse)
-library(readxl)
-  
 trashwheel = read_excel("./Data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", sheet = "Mr. Trash Wheel", range = cell_cols("A:N")) %>%
   janitor :: clean_names() %>% 
   drop_na(dumpster) %>% 
@@ -32,7 +34,7 @@ precipitation_2018 = read_excel ("./Data/Trash-Wheel-Collection-Totals-8-6-19.xl
 precipitation_final = bind_rows(precipitation_2017, precipitation_2018) %>% 
   mutate(Month = month.name[Month])
 ```
-**Comment on Problem 1:** The Mr. Trash Wheel dataset has 344 observations and 14 variables. The average weight of trash collected were `r mean(pull(trashwheel, weight_tons))` tons. The average number of plastic bottles collected were `r mean(pull(trashwheel, plastic_bottles))` plastic bottles. The weight of trash is an important outcome in understanding how much trash is being collected in Baltimore. The number of plastic bottles collected is important if researchers are interested in studying recycling habits. The median number of sports balls in a dumpter in 2017 was r total(pull(trashwheel, year = "2017", sports_balls)) balls. 
+**Comment on Problem 1:** The Mr. Trash Wheel dataset has 344 observations and 14 variables. The average weight of trash collected was `r round(mean(pull(trashwheel, weight_tons)))` tons. The average number of homes powered was `r round(mean(pull(trashwheel, homes_powered)))` homes. The weight of trash is an important measure for understanding how much trash is being collected in Baltimore, MD. The number of homes powered is important to evaluate the efficiency of this community project. The median number of sports balls in a dumpster in 2017 was `r median(pull(filter(trashwheel, year == "2017"), sports_balls))` balls.
 
 The 2017 and 2018 Precipitation datasets each have 12 observations and 3 variables, whereas the combined 2017 and 2018 Precipitation datasets have 24 observations and 3 variables. The total precipitation in 2018 was `r sum(pull(precipitation_2018,Total))` inches.
 
@@ -73,16 +75,15 @@ unemployment = read_csv(file ="./Data/fivethirtyeight_datasets/unemployment.csv"
 
 Join the datasets together: snp to polls
 ```{r}
-snp_pols = left_join(snp, pols_month, by = c("year", "month"))
+snp_pols = inner_join(snp, pols_month, by = c("year", "month"))
 ```
 
 Join unemployment to result
 ```{r}
-unemploy_snp_pols = left_join(snp_pols, unemployment, by = c("year", "month"))
-
-#Write a short paragraph about these datasets. Explain briefly what each dataset contained, and describe the resulting dataset (e.g. give the dimension, range of years, and names of key variables).
+unemploy_snp_pols = merge(snp_pols, unemployment, by = c("year", "month")) %>% 
+  janitor::clean_names()
 ```
-
+**Comment on Problem 2:** The pols_month dataset contained 822 observations and 9 variables. The snp dataset contained 787 observations and 3 variables. The unemployment dataset contained 816 observations and 3 variables. After joining and merging the datasets, the resulting dataset has `r nrow(unemploy_snp_pols)` rows, `r ncol(unemploy_snp_pols)` columns, ranges from 1950-2015, and includes the SNP closing index, presidential party, and unemployment rate, to name a few variables.
 
 
 # Problem 3: Popular Baby Names Dataset
@@ -99,7 +100,6 @@ babynames = read_csv(file = "./Data/Popular_Baby_Names.csv") %>%
   mutate(ethnicity = replace (ethnicity, ethnicity == "WHITE NON HISP", "WHITE NON HISPANIC")) %>%
   mutate(childs_first_name = toupper(childs_first_name))
 ```
-Description of what was done: 
 
 Produce a well-structured, reader-friendly table for Olivia
 ```{r}
@@ -114,7 +114,6 @@ olivia =
   ) %>% 
   select(ethnicity, `2011`, `2012`, `2013`, `2014`, `2015`, `2016`)
 ```
-
 
 Produce a well-structured, reader-friendly table most popular male name
 ```{r}
