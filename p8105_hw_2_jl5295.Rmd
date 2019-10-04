@@ -31,23 +31,63 @@ precipitation_2018 = read_excel ("./Data/Trash-Wheel-Collection-Totals-8-6-19.xl
 
 precipitation_final = bind_rows(precipitation_2017, precipitation_2018) %>% 
   mutate(Month = month.name[Month])
-
-# Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in both resulting datasets, and give examples of key variables. For available data, what was the total precipitation in 2018? What was the median number of sports balls in a dumpster in 2017?
 ```
-The Mr. Trash Wheel dataset has 344 observations and 14 variables. The 2017 and 2018 Precipitation datasets each have 12 observations and 3 variables, whereas the combined 2017 and 2018 Precipitation datasets have 24 observations and 3 variables. The total precipitation in 2018 was `r sum(pull(precipitation_2018,Total))`.
+**Comment on Problem 1:** The Mr. Trash Wheel dataset has 344 observations and 14 variables. The average weight of trash collected were `r mean(pull(trashwheel, weight_tons))` tons. The average number of plastic bottles collected were `r mean(pull(trashwheel, plastic_bottles))` plastic bottles. The weight of trash is an important outcome in understanding how much trash is being collected in Baltimore. The number of plastic bottles collected is important if researchers are interested in studying recycling habits. The median number of sports balls in a dumpter in 2017 was r total(pull(trashwheel, year = "2017", sports_balls)) balls. 
+
+The 2017 and 2018 Precipitation datasets each have 12 observations and 3 variables, whereas the combined 2017 and 2018 Precipitation datasets have 24 observations and 3 variables. The total precipitation in 2018 was `r sum(pull(precipitation_2018,Total))` inches.
 
 
-# Problem 2: FiveThirtyEight
+# Problem 2: FiveThirtyEight Dataset
+
+Clean and tidy the pols-month dataset
 ```{r}
-pols_month = read_csv(file = "./Data/fivethirtyeight_datasets/pols-month.csv") 
+pols_month = read_csv(file = "./Data/fivethirtyeight_datasets/pols-month.csv") %>% 
+  separate(mon, into = c("year", "month", "day")) %>% 
+  mutate(month = month.name[as.numeric(month)],
+         president = recode(prez_gop, "0" = "dem", "1" = "gop", "2" = "gop"),
+         year = as.numeric(year)) %>% 
+  select(-c(prez_dem, prez_gop, day))
 ```
-822 and 11 variables
-if statements
-  president = recode(prez)
+
+Clean and tidy the snp dataset
+```{r}
+snp = read_csv(file ="./Data/fivethirtyeight_datasets/snp.csv") %>% 
+  separate(date, into = c("month", "day", "year")) %>% 
+  mutate(
+    month = month.name[as.numeric(month)],
+    year = as.numeric(year)) %>% 
+  select(year, month, everything (), -c(day)) %>% 
+  arrange(year, month)
+```
+
+Clean and tidy the unemployment dataset
+```{r}
+unemployment = read_csv(file ="./Data/fivethirtyeight_datasets/unemployment.csv") %>% 
+  pivot_longer(
+   cols = Jan:Dec,
+   names_to = "month", 
+   values_to = "unemployment") %>% 
+  arrange (Year, month) %>% 
+  rename(year = Year)
+```
+
+Join the datasets together: snp to polls
+```{r}
+snp_pols = left_join(snp, pols_month, by = c("year", "month"))
+```
+
+Join unemployment to result
+```{r}
+unemploy_snp_pols = left_join(snp_pols, unemployment, by = c("year", "month"))
+
+#Write a short paragraph about these datasets. Explain briefly what each dataset contained, and describe the resulting dataset (e.g. give the dimension, range of years, and names of key variables).
+```
+
+
 
 # Problem 3: Popular Baby Names Dataset
 
-## Load and tidy the data (babynames)
+Load and tidy the data (babynames)
 ```{r}
 library (dplyr)
 babynames = read_csv(file = "./Data/Popular_Baby_Names.csv") %>%
@@ -61,7 +101,7 @@ babynames = read_csv(file = "./Data/Popular_Baby_Names.csv") %>%
 ```
 Description of what was done: 
 
-## Produce a well-structured, reader-friendly table for Olivia
+Produce a well-structured, reader-friendly table for Olivia
 ```{r}
 olivia = 
   babynames %>% 
@@ -76,7 +116,7 @@ olivia =
 ```
 
 
-## Produce a well-structured, reader-friendly table most popular male name
+Produce a well-structured, reader-friendly table most popular male name
 ```{r}
 male_name =
   babynames %>% 
@@ -92,7 +132,7 @@ male_name =
 male_name
 ```
 
-## Produce a Scatterplot for Rank in Popularity and Number of Children with a Name
+Produce a Scatterplot for Rank in Popularity and Number of Children with a Name
 ```{r}
 male_white_2016 =
   babynames %>%
